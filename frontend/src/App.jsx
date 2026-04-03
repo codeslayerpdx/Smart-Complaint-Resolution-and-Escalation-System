@@ -6,6 +6,8 @@ import ComplaintDetails from './pages/ComplaintDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
+import Analytics from './pages/Analytics';
+import Escalations from './pages/Escalations';
 import { ComplaintProvider } from './context/ComplaintContext';
 import './App.css';
 
@@ -21,6 +23,8 @@ function App() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="raise-complaint" element={<RaiseComplaint />} />
         <Route path="complaint/:id" element={<ComplaintDetails />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="escalations" element={<Escalations />} />
       </Route>
       </Routes>
     </ComplaintProvider>

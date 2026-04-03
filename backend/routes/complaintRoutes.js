@@ -9,10 +9,12 @@ const { createComplaint,
   getAllComplaints,
   updateComplaintStatus,
   assignComplaint,
-  getAssignedComplaints } = require("../controllers/complaintController");
+  getAssignedComplaints,
+  getSummary,
+  getEscalatedComplaints, } = require("../controllers/complaintController");
 
 
-  
+
 // Only student can create complaint
 router.post("/", protect, authorizeRoles("student"), createComplaint);
 
@@ -59,6 +61,22 @@ router.put(
   protect,
   authorizeRoles("staff", "supervisor"),
   updateComplaintStatus
+);
+
+// Analytics
+router.get(
+  "/summary",
+  protect,
+  authorizeRoles("admin", "supervisor"),
+  getSummary
+);
+
+// Escalated complaints
+router.get(
+  "/escalated",
+  protect,
+  authorizeRoles("admin", "supervisor"),
+  getEscalatedComplaints
 );
 
 

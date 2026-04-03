@@ -98,7 +98,7 @@ const assignComplaint = async (req, res) => {
     }
 
     complaint.assignedTo = assignedTo;
-    
+
     await complaint.save();
 
     res.status(200).json({
@@ -127,6 +127,45 @@ const getAssignedComplaints = async (req, res) => {
 };
 
 
+// Get complaint summary (admin/supervisor)
+const getSummary = async (req, res) => {
+  try {
+    const total = await Complaint.countDocuments();
+    const open = await Complaint.countDocuments({ status: "open" });
+    const inProgress = await Complaint.countDocuments({ status: "in-progress" });
+    const resolved = await Complaint.countDocuments({ status: "resolved" });
+    const escalated = await Complaint.countDocuments({ status: "escalated" });
+
+    res.status(200).json({
+      total,
+      open,
+      inProgress,
+      resolved,
+      escalated,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+// Get escalated complaints
+const getEscalatedComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find({ status: "escalated" }).populate(
+      "user",
+      "name email"
+    );
+
+    res.status(200).json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 // 🔥 EXPORT ALL FUNCTIONS
 module.exports = {
@@ -136,5 +175,7 @@ module.exports = {
   updateComplaintStatus,
   assignComplaint,
   getAssignedComplaints,
+  getSummary,
+  getEscalatedComplaints,
 };
 

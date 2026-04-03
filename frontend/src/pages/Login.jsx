@@ -42,7 +42,7 @@ const Login = () => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        
+
         // Optional demo retainers so dashboard doesn't break
         localStorage.setItem('userRole', formData.role);
         localStorage.setItem('userName', formData.email.split('@')[0]);
@@ -85,7 +85,7 @@ const Login = () => {
                 onChange={handleChange}
                 required
               />
-              
+
               <Input
                 id="password"
                 label="Password"
@@ -113,7 +113,7 @@ const Login = () => {
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
-            
+
             <div className="auth-footer">
               Don't have an account? <Link to="/register">Register here</Link>
             </div>

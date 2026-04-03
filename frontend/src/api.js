@@ -63,3 +63,21 @@ export const assignComplaint = async (id, userId) => {
   
   return handleResponse(response);
 };
+
+export const fetchSummary = async () => {
+  const response = await fetch(`${API_URL}/complaints/summary`, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  return handleResponse(response);
+};
+
+export const fetchEscalated = async () => {
+  const response = await fetch(`${API_URL}/complaints/escalated`, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  return handleResponse(response);
+};
