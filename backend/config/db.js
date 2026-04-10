@@ -2,19 +2,18 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const uri =
-      process.env.USE_ATLAS === "true"
-        ? process.env.MONGO_URI_ATLAS
-        : process.env.MONGO_URI_LOCAL;
+    const uri = process.env.MONGO_URI || process.env.MONGO_URI_LOCAL;
 
+    if (!uri) {
+      throw new Error("MongoDB connection string (MONGO_URI) is missing!");
+    }
+
+    
     await mongoose.connect(uri);
 
-    console.log(
-      "MongoDB Connected:",
-      process.env.USE_ATLAS === "true" ? "ATLAS" : "LOCAL"
-    );
+    console.log("MongoDB Connected Successfully");
   } catch (err) {
-    console.log("DB Error:", err.message);
+    console.log("DB Connection Error:", err.message);
     process.exit(1);
   }
 };

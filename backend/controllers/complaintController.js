@@ -1,4 +1,6 @@
 const Complaint = require("../models/Complaint");
+const { sendResolutionEmail } = require("../utils/emailService");
+
 
 // Create complaint (student)
 const createComplaint = async (req, res) => {
@@ -57,32 +59,55 @@ const getAllComplaints = async (req, res) => {
 const updateComplaintStatus = async (req, res) => {
   try {
     const { status } = req.body;
+    
+    // Normalize status for comparison
+    const normalizedStatus = status ? status.toLowerCase() : null;
 
     // validate status
     const validStatuses = ["open", "in-progress", "resolved", "escalated"];
-    if (status && !validStatuses.includes(status)) {
+    if (normalizedStatus && !validStatuses.includes(normalizedStatus)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const complaint = await Complaint.findById(req.params.id);
+    const complaint = await Complaint.findById(req.params.id).populate("user", "name email");
 
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
+    const previousStatus = complaint.status;
+    
     // update status
-    complaint.status = status || complaint.status;
+    complaint.status = normalizedStatus || complaint.status;
 
     await complaint.save();
+
+    // Trigger email notification if status changed to 'resolved'
+    if (normalizedStatus === "resolved" && previousStatus !== "resolved") {
+      console.log(`Triggering resolution email for complaint: ${complaint.title}`);
+      const resolvedAt = new Date().toLocaleString();
+      
+      // Asynchronous call (don't wait for email to send to return response)
+      sendResolutionEmail(
+        complaint.user.email,
+        complaint.user.name,
+        complaint.title,
+        resolvedAt
+      ).catch(err => console.error("Email service error:", err.message));
+    } else {
+      console.log(`No email sent. Status: ${normalizedStatus}, Previous: ${previousStatus}`);
+    }
 
     res.status(200).json({
       message: "Complaint updated",
       complaint,
     });
   } catch (error) {
+    console.error("Update status error:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 

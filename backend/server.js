@@ -6,7 +6,11 @@ const connectDB = require("./config/db");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 
 // DB connect
@@ -22,10 +26,12 @@ app.get("/", (req, res) => {
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protectedRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 
