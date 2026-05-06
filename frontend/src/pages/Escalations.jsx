@@ -34,7 +34,7 @@ const Escalations = () => {
 
   if (error) {
     return (
-      <div style={{ padding: '20px', color: 'red' }}>
+      <div style={{ padding: 'var(--spacing-5)', color: 'var(--color-danger-600)' }}>
         <h2>Error</h2>
         <p>{error}</p>
       </div>

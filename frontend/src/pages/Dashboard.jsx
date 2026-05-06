@@ -9,6 +9,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
@@ -16,6 +17,7 @@ const Dashboard = () => {
 
   const loadComplaints = async () => {
     try {
+      setLoading(true);
       const data = await fetchComplaints();
       const sanitizedData = data.map(c => {
         const rawStatus = (c.status || 'open').toLowerCase();
@@ -38,16 +40,19 @@ const Dashboard = () => {
       setComplaints(sanitizedData);
     } catch (err) {
       setError(err.message);
-      // Basic fallback error handling
       if (err.message.includes('Unauthorized')) {
         navigate('/login');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     loadComplaints();
   }, []);
+
+  const filteredComplaints = complaints.filter(c => activeTab === 'all' || c.effectiveStatus === activeTab);
 
   return (
     <div className="dashboard">
@@ -57,14 +62,14 @@ const Dashboard = () => {
           <p className="page-subtitle">Welcome back! Here's an overview of the complaints.</p>
         </div>
         {(user?.role || localStorage.getItem('userRole')) === 'student' && (
-          <Button onClick={() => navigate('/raise-complaint')}>
+          <Button variant="primary" onClick={() => navigate('/raise-complaint')}>
             Raise New Complaint
           </Button>
         )}
       </div>
 
       {error && (
-        <div style={{ padding: '10px', backgroundColor: '#fee2e2', color: 'red', borderRadius: '4px', marginBottom: '20px' }}>
+        <div style={{ padding: 'var(--spacing-4)', backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger-700)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-5)', border: '1px solid var(--color-danger-300)' }}>
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -102,11 +107,21 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <div className="complaints-grid">
-        {complaints.filter(c => activeTab === 'all' || c.effectiveStatus === activeTab).map((complaint) => (
-          <ComplaintCard key={complaint._id} complaint={complaint} onClick={(id) => navigate(`/complaint/${id}`)} />
-        ))}
-      </div>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <div style={{ color: 'var(--color-gray-500)', fontSize: 'var(--text-lg)', fontWeight: 500 }}>Loading dashboard...</div>
+        </div>
+      ) : filteredComplaints.length === 0 ? (
+        <div style={{ padding: '60px 20px', textAlign: 'center', background: 'var(--color-white)', borderRadius: 'var(--radius-lg)', marginTop: '20px', color: 'var(--color-gray-500)', fontSize: '1.1rem', border: '1px dashed var(--color-gray-300)' }}>
+          No complaints found for this view.
+        </div>
+      ) : (
+        <div className="complaints-grid">
+          {filteredComplaints.map((complaint) => (
+            <ComplaintCard key={complaint._id} complaint={complaint} onClick={(id) => navigate(`/complaint/${id}`)} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

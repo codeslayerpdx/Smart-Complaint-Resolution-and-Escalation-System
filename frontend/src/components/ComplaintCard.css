@@ -1,40 +1,43 @@
 .complaint-card {
   height: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .complaint-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.status-border-escalated {
-  border-left: 4px solid var(--color-danger);
-}
-
-.status-border-in-progress {
-  border-left: 4px solid var(--color-warning);
-}
-
-.status-border-resolved {
-  border-left: 4px solid var(--color-success);
-}
-
-.status-border-open {
-  border-left: 4px solid var(--color-gray-400);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-gray-300);
 }
 
 .complaint-card-title {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
-.complaint-id {
-  font-size: 0.75rem;
+.complaint-id-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--text-xs);
   color: var(--color-gray-500);
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.complaint-card-title h4 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 0;
+  line-height: 1.3;
 }
 
 .complaint-badges {
@@ -53,68 +56,67 @@
 
 .meta-item {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--spacing-1);
   padding: var(--spacing-2) 0;
-  border-bottom: 1px dashed var(--color-gray-200);
-}
-
-.meta-item:last-child {
-  border-bottom: none;
 }
 
 .meta-label {
   color: var(--color-gray-500);
-  white-space: nowrap;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 .meta-value {
   color: var(--color-gray-900);
   font-weight: 500;
-  text-align: right;
+  font-size: var(--text-sm);
 }
 
 .text-danger {
-  color: var(--color-danger);
+  color: var(--color-danger-600);
 }
 
 .delay-reason {
   background-color: var(--color-warning-bg);
-  padding: var(--spacing-2);
-  border-radius: var(--radius-sm);
-  border-bottom: none;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-2);
 }
 
 .delay-reason .meta-value {
-  color: var(--color-warning);
+  color: var(--color-warning-700);
 }
 
 .complaint-footer {
   justify-content: space-between;
+  padding-top: var(--spacing-4);
 }
 
 .complaint-date {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-gray-400);
 }
 
 .complaint-action-link {
   display: flex;
   align-items: center;
-  color: var(--color-primary);
-  font-size: 0.875rem;
-  font-weight: 500;
+  color: var(--color-primary-600);
+  font-size: var(--text-sm);
+  font-weight: 600;
   gap: var(--spacing-1);
 }
 
 /* Specific styles for resolved complaints */
 .resolved-meta-item {
   background-color: var(--color-success-bg);
-  padding: var(--spacing-2);
-  border-radius: var(--radius-sm);
-  border-bottom: none;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-2);
 }
 
 .resolved-meta-item .meta-value {
-  color: var(--color-success);
+  color: var(--color-success-600);
 }

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Bell, User } from 'lucide-react';
+import { Bell, User, Menu } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import NotificationDropdown from '../ui/NotificationDropdown';
 import './Navbar.css';
 
-const Navbar = ({ role = 'Student', userName = 'John Doe' }) => {
+const Navbar = ({ role = 'Student', userName = 'John Doe', onToggleSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const { unreadCount, refreshNotifications } = useNotifications();
 
@@ -19,7 +19,9 @@ const Navbar = ({ role = 'Student', userName = 'John Doe' }) => {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        {/* Placeholder for possible breadcrumbs or mobil menu toggle */}
+        <button className="mobile-menu-btn" onClick={onToggleSidebar}>
+          <Menu size={24} />
+        </button>
       </div>
       
       <div className="navbar-right">

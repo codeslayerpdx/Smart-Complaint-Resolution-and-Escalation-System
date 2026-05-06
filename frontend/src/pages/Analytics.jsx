@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSummary } from '../api';
+import { List, FolderOpen, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import './Dashboard.css';
+import './Analytics.css';
 
 const Analytics = () => {
   const [data, setData] = useState(null);
@@ -26,33 +28,48 @@ const Analytics = () => {
   }, []);
 
   if (loading) {
-    return <div style={{ padding: '20px', fontSize: '1.1rem' }}>Loading analytics data...</div>;
+    return (
+      <div className="dashboard" style={{ padding: 'var(--spacing-6)' }}>
+        <div className="dashboard-header">
+          <h1 className="page-title">Summary & Analytics</h1>
+          <p className="page-subtitle">Loading metrics...</p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <div style={{ color: 'var(--color-gray-500)', fontSize: 'var(--text-lg)', fontWeight: 500 }}>Loading analytics data...</div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div style={{ padding: '20px', color: 'red' }}>
-        <h2>Error</h2>
-        <p>{error}</p>
+      <div className="dashboard" style={{ padding: 'var(--spacing-6)' }}>
+        <div style={{ backgroundColor: 'var(--color-danger-bg)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-lg)', textAlign: 'center', border: '1px solid var(--color-danger-300)' }}>
+          <AlertTriangle size={32} color="var(--color-danger-600)" style={{ margin: '0 auto var(--spacing-3)' }} />
+          <h2 style={{ color: 'var(--color-danger-700)', marginBottom: 'var(--spacing-2)' }}>Failed to load analytics</h2>
+          <p style={{ color: 'var(--color-danger-600)' }}>{error}</p>
+        </div>
       </div>
     );
   }
 
   if (!data || (data.total === 0 && data.open === 0 && data.inProgress === 0 && data.resolved === 0 && data.escalated === 0)) {
     return (
-      <div className="dashboard" style={{ padding: '20px' }}>
+      <div className="dashboard" style={{ padding: 'var(--spacing-6)' }}>
         <div className="dashboard-header">
           <h1 className="page-title">Summary & Analytics</h1>
+          <p className="page-subtitle">Overview of the current complaint statistics across the system.</p>
         </div>
-        <div style={{ padding: '40px 20px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', marginTop: '20px', color: '#64748b', fontSize: '1.1rem' }}>
-          No data available
+        <div style={{ padding: '60px 20px', textAlign: 'center', background: 'var(--color-white)', borderRadius: 'var(--radius-lg)', marginTop: '20px', color: 'var(--color-gray-500)', fontSize: '1.1rem', border: '1px dashed var(--color-gray-300)' }}>
+          <FolderOpen size={48} color="var(--color-gray-300)" style={{ margin: '0 auto var(--spacing-4)' }} />
+          No data available yet.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard" style={{ padding: '20px' }}>
+    <div className="dashboard" style={{ padding: 'var(--spacing-6)' }}>
       <div className="dashboard-header">
         <div>
           <h1 className="page-title">Summary & Analytics</h1>
@@ -60,26 +77,45 @@ const Analytics = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' }}>
-        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#64748b', fontSize: '1.1rem' }}>Total</h3>
-          <p style={{ fontSize: '2.5rem', margin: '15px 0 0 0', fontWeight: 'bold', color: '#334155' }}>{data.total}</p>
+      <div className="analytics-grid">
+        <div className="stat-card stat-card-total">
+          <div className="stat-card-header">
+            <h3 className="stat-card-title">Total</h3>
+            <div className="stat-icon-wrapper"><List size={20} /></div>
+          </div>
+          <p className="stat-value">{data.total}</p>
         </div>
-        <div style={{ background: '#eff6ff', padding: '20px', borderRadius: '8px', border: '1px solid #bfdbfe', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#3b82f6', fontSize: '1.1rem' }}>Open</h3>
-          <p style={{ fontSize: '2.5rem', margin: '15px 0 0 0', fontWeight: 'bold', color: '#1d4ed8' }}>{data.open}</p>
+        
+        <div className="stat-card stat-card-open">
+          <div className="stat-card-header">
+            <h3 className="stat-card-title">Open</h3>
+            <div className="stat-icon-wrapper"><FolderOpen size={20} /></div>
+          </div>
+          <p className="stat-value">{data.open}</p>
         </div>
-        <div style={{ background: '#fef3c7', padding: '20px', borderRadius: '8px', border: '1px solid #fde68a', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#d97706', fontSize: '1.1rem' }}>In Progress</h3>
-          <p style={{ fontSize: '2.5rem', margin: '15px 0 0 0', fontWeight: 'bold', color: '#b45309' }}>{data.inProgress}</p>
+        
+        <div className="stat-card stat-card-progress">
+          <div className="stat-card-header">
+            <h3 className="stat-card-title">In Progress</h3>
+            <div className="stat-icon-wrapper"><Clock size={20} /></div>
+          </div>
+          <p className="stat-value">{data.inProgress}</p>
         </div>
-        <div style={{ background: '#fce7f3', padding: '20px', borderRadius: '8px', border: '1px solid #fbcfe8', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#db2777', fontSize: '1.1rem' }}>Escalated</h3>
-          <p style={{ fontSize: '2.5rem', margin: '15px 0 0 0', fontWeight: 'bold', color: '#be185d' }}>{data.escalated}</p>
+        
+        <div className="stat-card stat-card-escalated">
+          <div className="stat-card-header">
+            <h3 className="stat-card-title">Escalated</h3>
+            <div className="stat-icon-wrapper"><AlertTriangle size={20} /></div>
+          </div>
+          <p className="stat-value">{data.escalated}</p>
         </div>
-        <div style={{ background: '#ecfdf5', padding: '20px', borderRadius: '8px', border: '1px solid #a7f3d0', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#10b981', fontSize: '1.1rem' }}>Resolved</h3>
-          <p style={{ fontSize: '2.5rem', margin: '15px 0 0 0', fontWeight: 'bold', color: '#047857' }}>{data.resolved}</p>
+        
+        <div className="stat-card stat-card-resolved">
+          <div className="stat-card-header">
+            <h3 className="stat-card-title">Resolved</h3>
+            <div className="stat-icon-wrapper"><CheckCircle size={20} /></div>
+          </div>
+          <p className="stat-value">{data.resolved}</p>
         </div>
       </div>
     </div>

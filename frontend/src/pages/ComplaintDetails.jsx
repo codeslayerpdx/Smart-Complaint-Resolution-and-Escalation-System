@@ -4,6 +4,8 @@ import Card, { CardHeader, CardContent } from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import StatusBadge from '../components/StatusBadge';
+import PriorityBadge from '../components/PriorityBadge';
 import { ArrowLeft, Clock, MessageSquare, AlertTriangle, CheckCircle, User } from 'lucide-react';
 import { fetchComplaints, updateComplaintStatus, assignComplaint, fetchAssignableUsers } from '../api';
 import './ComplaintDetails.css';
@@ -126,8 +128,27 @@ const ComplaintDetails = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>Loading details...</div>;
-  if (error) return <div style={{ padding: '20px', color: 'red', textAlign: 'center' }}>{error}</div>;
+  if (loading) {
+    return (
+      <div className="complaint-details-page" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+        <div style={{ color: 'var(--color-gray-500)', fontSize: 'var(--text-lg)', fontWeight: 500 }}>Loading complaint details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="complaint-details-page">
+        <div style={{ backgroundColor: 'var(--color-danger-bg)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-lg)', textAlign: 'center', border: '1px solid var(--color-danger-300)' }}>
+          <AlertTriangle size={32} color="var(--color-danger-600)" style={{ margin: '0 auto var(--spacing-3)' }} />
+          <h2 style={{ color: 'var(--color-danger-700)', marginBottom: 'var(--spacing-2)' }}>Failed to load complaint</h2>
+          <p style={{ color: 'var(--color-danger-600)' }}>{error}</p>
+          <Button variant="outline" className="mt-3" onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!complaint) return null;
 
   // Provide fallbacks for UI elements not fully implemented in backend yet
@@ -153,14 +174,12 @@ const ComplaintDetails = () => {
           <span className="complaint-id-large">{displayComplaint.id}</span>
           <h1 className="page-title">{displayComplaint.title}</h1>
         </div>
-        <div className="action-section" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="action-section">
           {(userRole === 'staff' || userRole === 'supervisor' || userRole === 'admin') && (
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
               <select 
-                className="input-field" 
                 value={status} 
                 onChange={(e) => setStatus(e.target.value)}
-                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
               >
                 <option value="open">Open</option>
                 <option value="in-progress">In Progress</option>
@@ -172,17 +191,15 @@ const ComplaintDetails = () => {
           )}
 
           {(userRole === 'admin' || userRole === 'supervisor') && (
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
               <select
-                className="input-field"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '200px' }}
               >
-                <option value="">Select staff/supervisor/admin</option>
+                <option value="">Select Staff / Admin...</option>
                 {assignableUsers.map(user => (
                   <option key={user._id} value={user._id}>
-                    {user.name} ({user.role}) - {user.email}
+                    {user.name} ({user.role})
                   </option>
                 ))}
               </select>
@@ -198,17 +215,13 @@ const ComplaintDetails = () => {
           <Card className="info-card">
             <CardContent>
               <div className="info-badges">
-                <Badge variant={displayComplaint.status} size="lg">
-                  <span className="badge-content">
-                    {getStatusIcon(displayComplaint.status)}
-                    {displayComplaint.status ? displayComplaint.status.toUpperCase() : ''}
-                  </span>
-                </Badge>
-                <Badge variant={displayComplaint.priority || 'low'} size="lg">
+                <StatusBadge status={displayComplaint.status} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', border: '1px solid var(--color-gray-200)', padding: 'var(--spacing-1) var(--spacing-3)', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--color-gray-600)' }}>
+                  <PriorityBadge priority={displayComplaint.priority} />
                   {displayComplaint.priority ? displayComplaint.priority.toUpperCase() : 'LOW'} PRIORITY
-                </Badge>
+                </div>
                 {displayComplaint.status === 'escalated' && displayComplaint.escalationLevel && (
-                  <Badge variant="danger" size="lg">Level: {displayComplaint.escalationLevel}</Badge>
+                  <Badge variant="danger" size="md">Escalation: {displayComplaint.escalationLevel}</Badge>
                 )}
               </div>
 

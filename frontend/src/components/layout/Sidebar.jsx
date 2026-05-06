@@ -4,10 +4,9 @@ import { LayoutDashboard, PlusCircle, AlertCircle, LogOut, CheckSquare, BarChart
 import { useAuth } from '../../context/AuthContext';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ role = 'student', isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const role = user?.role || 'student';
+  const { logout } = useAuth();
 
   // Mock role based links
   const links = [
@@ -29,9 +28,8 @@ const Sidebar = () => {
     navigate('/login');
   };
 
-
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <AlertCircle className="sidebar-logo-icon" size={28} />
         <h1 className="sidebar-title">SmartFix</h1>
@@ -44,6 +42,7 @@ const Sidebar = () => {
               <NavLink 
                 to={link.to} 
                 className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                onClick={onClose}
               >
                 {link.icon}
                 <span>{link.label}</span>

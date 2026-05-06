@@ -1,11 +1,10 @@
 import React from 'react';
-import Badge from './ui/Badge';
+import './ui/Badge.css';
 
 const PriorityBadge = ({ priority }) => {
+  if (!priority) return null;
   return (
-    <Badge variant={priority}>
-      {priority ? priority.toUpperCase() : ''}
-    </Badge>
+    <span className={`priority-dot priority-${priority}`} title={`Priority: ${priority}`}></span>
   );
 };
 
