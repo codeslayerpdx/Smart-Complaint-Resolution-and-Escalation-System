@@ -122,7 +122,24 @@ const assignComplaint = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
+    // Validate assignedTo user
+    const User = require("../models/user");
+    const userToAssign = await User.findById(assignedTo);
+    
+    if (!userToAssign) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (userToAssign.role === "student") {
+      return res.status(400).json({ message: "Complaints cannot be assigned to students." });
+    }
+
     complaint.assignedTo = assignedTo;
+    
+    // Optionally update status to "in-progress" if it's "open"
+    if (complaint.status === "open") {
+      complaint.status = "in-progress";
+    }
 
     await complaint.save();
 
@@ -152,22 +169,51 @@ const getAssignedComplaints = async (req, res) => {
 };
 
 
+// SLA logic constants matching frontend
+const SLA_HOURS = {
+  high: 4,
+  medium: 12,
+  low: 24,
+};
+
+const isOverdue = (complaint) => {
+  if (complaint.status === "resolved") return false;
+  if (complaint.status === "escalated") return true;
+
+  const deadline = new Date(complaint.createdAt);
+  const hours = SLA_HOURS[complaint.priority?.toLowerCase()] || 24;
+  deadline.setHours(deadline.getHours() + hours);
+  
+  return new Date() > deadline;
+};
+
 // Get complaint summary (admin/supervisor)
 const getSummary = async (req, res) => {
   try {
-    const total = await Complaint.countDocuments();
-    const open = await Complaint.countDocuments({ status: "open" });
-    const inProgress = await Complaint.countDocuments({ status: "in-progress" });
-    const resolved = await Complaint.countDocuments({ status: "resolved" });
-    const escalated = await Complaint.countDocuments({ status: "escalated" });
+    const complaints = await Complaint.find();
+    
+    let stats = {
+      total: complaints.length,
+      open: 0,
+      inProgress: 0,
+      resolved: 0,
+      escalated: 0
+    };
 
-    res.status(200).json({
-      total,
-      open,
-      inProgress,
-      resolved,
-      escalated,
+    complaints.forEach(c => {
+      const status = c.status.toLowerCase();
+      if (status === "resolved") {
+        stats.resolved++;
+      } else if (status === "escalated" || isOverdue(c)) {
+        stats.escalated++;
+      } else if (status === "in-progress") {
+        stats.inProgress++;
+      } else {
+        stats.open++;
+      }
     });
+
+    res.status(200).json(stats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -179,12 +225,16 @@ const getSummary = async (req, res) => {
 // Get escalated complaints
 const getEscalatedComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find({ status: "escalated" }).populate(
+    const allComplaints = await Complaint.find().populate(
       "user",
       "name email"
     );
 
-    res.status(200).json(complaints);
+    const escalatedComplaints = allComplaints.filter(c => 
+      c.status.toLowerCase() === "escalated" || isOverdue(c)
+    );
+
+    res.status(200).json(escalatedComplaints);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

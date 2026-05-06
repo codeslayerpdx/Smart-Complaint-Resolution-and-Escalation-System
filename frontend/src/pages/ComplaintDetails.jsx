@@ -5,7 +5,7 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { ArrowLeft, Clock, MessageSquare, AlertTriangle, CheckCircle, User } from 'lucide-react';
-import { fetchComplaints, updateComplaintStatus, assignComplaint } from '../api';
+import { fetchComplaints, updateComplaintStatus, assignComplaint, fetchAssignableUsers } from '../api';
 import './ComplaintDetails.css';
 
 const MOCK_COMPLAINT_DETAILS = {
@@ -45,6 +45,7 @@ const ComplaintDetails = () => {
 
   const [status, setStatus] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
+  const [assignableUsers, setAssignableUsers] = useState([]);
 
   const userRole = localStorage.getItem('userRole') || 'student';
 
@@ -56,11 +57,13 @@ const ComplaintDetails = () => {
       if (!found) {
         setError('Complaint not found');
       } else {
+        const rawStatus = (found.status || 'open').toLowerCase();
+        const status = rawStatus === 'pending' ? 'open' : rawStatus;
         setComplaint({
           ...found,
-          status: found.status === 'pending' ? 'open' : found.status
+          status
         });
-        setStatus(found.status === 'pending' ? 'open' : (found.status || 'open'));
+        setStatus(status);
         setAssignedTo(found.assignedTo || '');
       }
     } catch (err) {
@@ -73,7 +76,19 @@ const ComplaintDetails = () => {
 
   useEffect(() => {
     loadComplaint();
-  }, [id]);
+    if (userRole === 'admin' || userRole === 'supervisor') {
+      loadAssignableUsers();
+    }
+  }, [id, userRole]);
+
+  const loadAssignableUsers = async () => {
+    try {
+      const users = await fetchAssignableUsers();
+      setAssignableUsers(users);
+    } catch (err) {
+      console.error('Failed to fetch assignable users', err);
+    }
+  };
 
   const handleStatusUpdate = async () => {
     if (!status) return;
@@ -158,15 +173,20 @@ const ComplaintDetails = () => {
 
           {(userRole === 'admin' || userRole === 'supervisor') && (
             <div style={{ display: 'flex', gap: '10px' }}>
-              <input 
-                type="text"
-                placeholder="Assign to User ID"
+              <select
                 className="input-field"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-              />
-              <Button variant="secondary" onClick={handleAssign}>Assign</Button>
+                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '200px' }}
+              >
+                <option value="">Select staff/supervisor/admin</option>
+                {assignableUsers.map(user => (
+                  <option key={user._id} value={user._id}>
+                    {user.name} ({user.role}) - {user.email}
+                  </option>
+                ))}
+              </select>
+              <Button variant="secondary" onClick={handleAssign} disabled={!assignedTo}>Assign</Button>
             </div>
           )}
         </div>

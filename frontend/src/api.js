@@ -117,3 +117,12 @@ export const fetchEscalated = async () => {
 
   return handleResponse(response);
 };
+
+export const fetchAssignableUsers = async () => {
+  const response = await fetch(`${API_URL}/users/assignable`, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  return handleResponse(response);
+};

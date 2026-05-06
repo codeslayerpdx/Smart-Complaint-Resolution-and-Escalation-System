@@ -4,6 +4,7 @@ import ComplaintCard from '../components/ComplaintCard';
 import { useNavigate } from 'react-router-dom';
 import { fetchComplaints } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { getSLAStatus } from '../utils/sla';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -16,10 +17,24 @@ const Dashboard = () => {
   const loadComplaints = async () => {
     try {
       const data = await fetchComplaints();
-      const sanitizedData = data.map(c => ({
-        ...c,
-        status: c.status === 'pending' ? 'open' : c.status
-      }));
+      const sanitizedData = data.map(c => {
+        const rawStatus = (c.status || 'open').toLowerCase();
+        const status = rawStatus === 'pending' ? 'open' : rawStatus;
+        
+        let effectiveStatus = status;
+        if (status !== 'resolved' && status !== 'escalated') {
+          const sla = getSLAStatus(c.createdAt || c.date, c.priority);
+          if (sla?.isOverdue) {
+            effectiveStatus = 'escalated';
+          }
+        }
+
+        return {
+          ...c,
+          status,
+          effectiveStatus
+        };
+      });
       setComplaints(sanitizedData);
     } catch (err) {
       setError(err.message);
@@ -65,30 +80,30 @@ const Dashboard = () => {
           className={`tab-btn ${activeTab === 'open' ? 'active' : ''}`}
           onClick={() => setActiveTab('open')}
         >
-          Open ({complaints.filter(c => c.status === 'open').length})
+          Open ({complaints.filter(c => c.effectiveStatus === 'open').length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'in-progress' ? 'active' : ''}`}
           onClick={() => setActiveTab('in-progress')}
         >
-          In Progress ({complaints.filter(c => c.status === 'in-progress').length})
+          In Progress ({complaints.filter(c => c.effectiveStatus === 'in-progress').length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'escalated' ? 'active' : ''}`}
           onClick={() => setActiveTab('escalated')}
         >
-          Escalated ({complaints.filter(c => c.status === 'escalated').length})
+          Escalated ({complaints.filter(c => c.effectiveStatus === 'escalated').length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'resolved' ? 'active' : ''}`}
           onClick={() => setActiveTab('resolved')}
         >
-          Resolved ({complaints.filter(c => c.status === 'resolved').length})
+          Resolved ({complaints.filter(c => c.effectiveStatus === 'resolved').length})
         </button>
       </div>
 
       <div className="complaints-grid">
-        {complaints.filter(c => activeTab === 'all' || c.status === activeTab).map((complaint) => (
+        {complaints.filter(c => activeTab === 'all' || c.effectiveStatus === activeTab).map((complaint) => (
           <ComplaintCard key={complaint._id} complaint={complaint} onClick={(id) => navigate(`/complaint/${id}`)} />
         ))}
       </div>
