@@ -84,7 +84,6 @@ const ComplaintCard = ({ complaint, onClick }) => {
               </span>
             </div>
           )}
-          
           {complaint.reason && !isResolved && (
             <div className="meta-item delay-reason">
               <span className="meta-label">Reason for Delay</span>
